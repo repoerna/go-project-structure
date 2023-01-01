@@ -1,12 +1,44 @@
 package roach
 
 import (
+	"context"
 	"fmt"
 	"go-boilerplate-api/internal/config"
+	"go-boilerplate-api/pkg/pool"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/tracelog"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+func PreparePoolConnection(ctx context.Context, cfg *config.Configurations) (*pgxpool.Pool, error) {
+	pgxLogger := pool.NewPGXLogrusLogger(&log.Logger{})
+
+	pgxLogLevel, err := pool.LogLevelFromEnv(cfg.LogLevel)
+	if err != nil {
+		log.Warn(err)
+		pgxLogLevel = tracelog.LogLevelDebug
+	}
+
+	// example dsn - "postgresql://root@localhost:26257/photos?sslmode=disable",
+	dsn := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?application_name=$ %s",
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBName,
+		cfg.AppName,
+	)
+
+	if cfg.AppEnv != "production" {
+		dsn = dsn + "sslmode=disable"
+	}
+
+	return pool.NewPGXPool(ctx, dsn, pgxLogger, pgxLogLevel)
+
+}
 
 func Init(cfg *config.Configurations) (*gorm.DB, error) {
 	// example dsn - "postgresql://root@localhost:26257/photos?sslmode=disable",
@@ -24,8 +56,6 @@ func Init(cfg *config.Configurations) (*gorm.DB, error) {
 	}
 
 	gormConf := gorm.Config{}
-
-	// gormConf.Logger =
 
 	return gorm.Open(postgres.Open(dsn), &gormConf)
 }

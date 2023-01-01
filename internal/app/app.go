@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"go-boilerplate-api/internal/config"
 	roach "go-boilerplate-api/internal/infrastructure/cockroachdb"
 
@@ -21,19 +20,20 @@ func New() app {
 func (a *app) Run() {
 	a.Setup()
 
-	log.Info(a.Config)
+	// log.Info(a.Config)
 
-	log.Info("test")
-	log.Trace("test")
-	log.Debug("test")
-	log.Error("test")
-	log.Warn("test")
-	log.Fatal("test")
+	// log.Info("test")
+	// log.Trace("test")
+	// log.Debug("test")
+	// log.Error("test")
+	// log.Warn("test")
+	// log.Fatal("test")
 
 }
 
 func (a *app) Setup() {
 	var err error
+	// var ctx = context.Background()
 
 	// setup configuration
 	a.Config = config.New()
@@ -42,25 +42,18 @@ func (a *app) Setup() {
 	// setup database
 	a.DB, err = roach.Init(a.Config)
 	if err != nil {
-		log.Fatal("can't connect to databse: ", err)
+		log.Fatal("cannot connect to database: ", err)
 	}
-	log.Info(fmt.Sprintf("database connected on %s...", a.Config.DBHost))
+	log.Info("database connected to: ", a.Config.DBHost)
 
-	// sqlDB, _ := a.DB.DB()
-	// sqlDB.Ping()
-	// pgxLogger := pool.NewPGXLogrusLogger(&log.Logger{})
-
-	// pgxLogLevel, err := pool.LogLevelFromEnv(a.Config.LogLevel)
+	// a.PGXPool, err = roach.PreparePoolConnection(ctx, a.Config)
 	// if err != nil {
-	// 	log.Fatal(err)
+	// 	log.Fatal("cannot connect to database: ", err)
 	// }
+	// log.Info("database connected to: ", a.Config.DBHost)
 
-	// a.PGXPool, err = pool.NewPGXPool(context.Background(), "", pgxLogger, pgxLogLevel)
+	// err = a.PGXPool.Ping(ctx)
 	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// if err = a.PGXPool.Ping(context.Background()); err != nil {
 	// 	log.Fatal(err)
 	// }
 
